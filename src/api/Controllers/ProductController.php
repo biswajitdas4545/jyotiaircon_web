@@ -12,7 +12,7 @@ class ProductController {
 
     public function getAll(): void {
         $stmt = $this->db->query("SELECT * FROM ac_product WHERE is_active = TRUE ORDER BY product_id DESC");
-        Response::json($stmt->fetchAll(), 200, 'Products fetcd successfully.');
+        Response::json($stmt->fetchAll(), 200, 'Products fetc successfully test.');
     }
 
     public function create(array $input): void {
