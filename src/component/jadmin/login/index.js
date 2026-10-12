@@ -40,12 +40,10 @@ function Login() {
             }
 
             const data = await response.json();
-            const accessToken = data?.data?.access_token || data?.access_token;
-            if (!accessToken) {
-                throw new Error(data?.message || 'Login succeeded without an access token.');
+            if (data?.success === false) {
+                throw new Error(data?.message || 'Login failed. Please check your credentials.');
             }
 
-            sessionStorage.setItem('access_token', accessToken);
             window.location.href = "/dashboard";
         } catch (error) {
             console.error('Login API failed:', error);

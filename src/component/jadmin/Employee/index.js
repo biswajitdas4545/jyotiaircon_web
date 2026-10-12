@@ -8,17 +8,11 @@ import EmployeeService from '../../../services/employeeService';
 const EMPLOYEE_API_URL = 'https://jyotiairconditioning.in/websercice/api/employes';
 
 async function requestEmployeeApi(path, options = {}) {
-    const accessToken = sessionStorage.getItem('access_token');
-    if (!accessToken) {
-        throw new Error('Your session has expired. Please log in again.');
-    }
-
     const response = await fetch(`${EMPLOYEE_API_URL}${path}`, {
         ...options,
         headers: {
             'Accept': 'application/json',
             ...(options.body ? { 'Content-Type': 'application/json' } : {}),
-            'Authorization': `Bearer ${accessToken}`,
             ...options.headers
         }
     });
@@ -96,11 +90,6 @@ function Employee() {
         setFetchError('');
 
         try {
-            const accessToken = sessionStorage.getItem('access_token');
-            if (!accessToken) {
-                throw new Error('Your session has expired. Please log in again.');
-            }
-
             const query = new URLSearchParams({
                 page: String(page),
                 size: String(size),
@@ -109,8 +98,7 @@ function Employee() {
             });
             const response = await fetch(`https://jyotiairconditioning.in/websercice/api/employes?${query}`, {
                 headers: {
-                    'Accept': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+                    'Accept': 'application/json'
                 }
             });
             if (!response.ok) {
@@ -436,17 +424,11 @@ function Employee() {
         try {
             const name = newEmployeeData.name.trim();
             const [firstName, ...lastNameParts] = name.split(/\s+/);
-            const accessToken = sessionStorage.getItem('access_token');
-            if (!accessToken) {
-                throw new Error('Your session has expired. Please log in again.');
-            }
-
             const response = await fetch('https://jyotiairconditioning.in/websercice/api/employes', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${accessToken}`
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     first_name: firstName,

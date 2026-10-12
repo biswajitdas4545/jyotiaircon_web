@@ -26,7 +26,7 @@ if ($origin !== '') {
 header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
 header(
     'Access-Control-Allow-Headers: ' .
-    'Content-Type, Authorization, X-Requested-With, Accept'
+    'Content-Type, X-Requested-With, Accept'
 );
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(204);
@@ -41,7 +41,6 @@ spl_autoload_register(function ($class) {
 
 use Config\Database;
 use Utils\Response;
-use Middlewares\AuthMiddleware;
 use Controllers\AuthController;
 use Controllers\ProductController;
 use Controllers\CustomerController;
@@ -69,23 +68,25 @@ elseif (str_contains($uri, '/api/auth/refresh') && $method === 'POST') {
 elseif (str_contains($uri, '/api/auth/logout') && $method === 'POST') {
     (new AuthController($db))->logout($body);
 } 
-// Protected Endpoints
+// API Endpoints
 elseif (str_contains($uri, '/api/products')) {
-    AuthMiddleware::authenticate();
     $controller = new ProductController($db);
     $method === 'POST' ? $controller->create($body) : $controller->getAll();
 } 
-elseif (str_contains($uri, '/api/customers')) {
-    AuthMiddleware::authenticate();
+elseif (preg_match('~/(?:customers?)/?$~', $uri)) {
     $controller = new CustomerController($db);
-    $method === 'POST' ? $controller->create($body) : $controller->getAll();
-} 
+    if ($method === 'POST') {
+        $controller->create($body);
+    } elseif ($method === 'GET') {
+        $controller->getAll();
+    } else {
+        Response::json(null, 405, 'Method not allowed for this customer endpoint.');
+    }
+}
 elseif (str_ends_with($uri, '/api/getAll') && $method === 'GET') {
-    AuthMiddleware::authenticate();
     (new EmployeeController($db))->getAll();
 } 
 elseif (preg_match('~/(?:employees|employes)/(\d+)/?$~', $uri, $employeeMatch)) {
-    AuthMiddleware::authenticate();
     $controller = new EmployeeController($db);
     $employeeId = (int)$employeeMatch[1];
 
@@ -98,7 +99,6 @@ elseif (preg_match('~/(?:employees|employes)/(\d+)/?$~', $uri, $employeeMatch)) 
     }
 } 
 elseif (str_contains($uri, '/api/employees') || str_contains($uri, '/api/employes')) {
-    AuthMiddleware::authenticate();
     $controller = new EmployeeController($db);
     if ($method === 'POST') {
         $controller->create($body);
@@ -109,12 +109,10 @@ elseif (str_contains($uri, '/api/employees') || str_contains($uri, '/api/employe
     }
 } 
 elseif (str_contains($uri, '/api/service-slots')) {
-    AuthMiddleware::authenticate();
     $controller = new ServiceController($db);
     $method === 'POST' ? $controller->createSlot($body) : $controller->getSlots();
 } 
 elseif (str_contains($uri, '/api/complaints')) {
-    AuthMiddleware::authenticate();
     $controller = new ComplaintController($db);
     $method === 'POST' ? $controller->create($body) : $controller->getAll();
 } 

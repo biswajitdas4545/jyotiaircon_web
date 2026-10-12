@@ -6,12 +6,10 @@ import Nabvar from './navbar';
 const EMPLOYEE_API_URL = 'https://jyotiairconditioning.in/websercice/api/employes';
 const PAGE_SIZE = 10;
 
-const buildAuthHeaders = (extra = {}) => {
-  const token = sessionStorage.getItem('access_token');
+const buildApiHeaders = (extra = {}) => {
   return {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...extra,
   };
 };
@@ -77,11 +75,6 @@ function EmployeeWorking() {
     setError('');
 
     try {
-      const token = sessionStorage.getItem('access_token');
-      if (!token) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
       const query = new URLSearchParams({
         page: String(page),
         size: String(PAGE_SIZE),
@@ -91,7 +84,7 @@ function EmployeeWorking() {
 
       const response = await fetch(`${EMPLOYEE_API_URL}?${query.toString()}`, {
         method: 'GET',
-        headers: buildAuthHeaders(),
+        headers: buildApiHeaders(),
       });
 
       const responseText = await response.text();
@@ -148,11 +141,6 @@ function EmployeeWorking() {
     setSubmitError('');
 
     try {
-      const token = sessionStorage.getItem('access_token');
-      if (!token) {
-        throw new Error('Your session has expired. Please log in again.');
-      }
-
       const payload = {
         first_name: newEmployeeData.first_name.trim(),
         last_name: newEmployeeData.last_name.trim(),
@@ -167,7 +155,7 @@ function EmployeeWorking() {
 
       const response = await fetch(EMPLOYEE_API_URL, {
         method: 'POST',
-        headers: buildAuthHeaders(),
+        headers: buildApiHeaders(),
         body: JSON.stringify(payload),
       });
 
